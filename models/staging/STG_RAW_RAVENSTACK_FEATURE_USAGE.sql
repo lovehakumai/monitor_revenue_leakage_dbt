@@ -5,7 +5,7 @@ renamed as (
     select
         usage_id,
         subscription_id,
-        usage_date,
+        TO_DATE(usage_date) AS usage_date,
         feature_name,
         usage_count,
         usage_duration_secs,

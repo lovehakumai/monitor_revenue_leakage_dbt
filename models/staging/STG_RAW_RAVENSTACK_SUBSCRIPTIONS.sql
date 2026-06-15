@@ -5,7 +5,7 @@ renamed as (
     select
         subscription_id,
         account_id,
-        start_date,
+        TO_DATE(start_date) AS start_date,
         end_date,
         plan_tier,
         seats,

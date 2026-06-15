@@ -5,8 +5,8 @@ renamed as (
     select
         ticket_id,
         account_id,
-        submitted_at,
-        closed_at,
+        TO_DATE(submitted_at) AS submitted_at,
+        TO_TIMESTAMP(closed_at) AS closed_at,
         resolution_time_hours,
         priority,
         first_response_time_minutes,
