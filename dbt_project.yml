@@ -1,0 +1,19 @@
+name: 'pjt02_subscription'
+
+profile: 'pjt02_subscription'
+
+seed-paths: ["seeds"]
+model-paths: ["models"]
+macro-paths: ["macros"]
+clean-targets: 
+  - "target"
+  - "dbt_packages"
+
+models:
+  main:
+    staging: 
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
