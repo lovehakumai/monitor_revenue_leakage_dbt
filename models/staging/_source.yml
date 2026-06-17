@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: revenstack
+    database: KAGGLE_SUBSCRIPTION
+    schema: RAW
+    tables:
+      - name: RAW_RAVENSTACK_ACCOUNTS
+      - name: RAW_RAVENSTACK_CHURN_EVENTS 
+      - name: RAW_RAVENSTACK_FEATURE_USAGE 
+      - name: RAW_RAVENSTACK_SUBSCRIPTIONS 
+      - name: RAW_RAVENSTACK_SUPPORT_TICKETS 
+  - name: common
+    database: COMMON
+    schema: DBT_DEV
+    tables: 
+      - name: CMN_CALENDAR

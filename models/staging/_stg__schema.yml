@@ -1,12 +1,43 @@
 version: 2
 
-sources:
-  - name: revenstack
-    database: KAGGLE_SUBSCRIPTION
-    schema: RAW
-    tables:
-      - name: RAW_RAVENSTACK_ACCOUNTS 
-      - name: RAW_RAVENSTACK_CHURN_EVENTS 
-      - name: RAW_RAVENSTACK_FEATURE_USAGE 
-      - name: RAW_RAVENSTACK_SUBSCRIPTIONS 
-      - name: RAW_RAVENSTACK_SUPPORT_TICKETS 
+models:
+    - name: STG_RAW_RAVENSTACK_ACCOUNTS
+      columns:
+        - name: account_id
+          tests:
+            - unique
+            - not_null
+    - name: STG_RAW_RAVENSTACK_CHURN_EVENTS 
+      columns:
+        - name: churn_event_id
+          tests:
+            - unique
+            - not_null
+
+    - name: STG_RAW_RAVENSTACK_FEATURE_USAGE 
+      columns: 
+        - name: usage_id
+          tests: 
+            - not_null
+        - name: subscription_id
+          tests:
+            - not_null
+      tests:
+        - dbt_utils.unique_combination_of_columns:
+            arguments:
+              combination_of_columns:
+                - usage_id
+                - subscription_id
+
+    - name: STG_RAW_RAVENSTACK_SUBSCRIPTIONS 
+      columns:
+        - name: subscription_id
+          tests:
+            - unique
+            - not_null
+    - name: STG_RAW_RAVENSTACK_SUPPORT_TICKETS 
+      columns:
+        - name: ticket_id
+          tests:
+            - unique
+            - not_null

@@ -6,7 +6,7 @@ renamed as (
         subscription_id,
         account_id,
         TO_DATE(start_date) AS start_date,
-        end_date,
+        TO_DATE(end_date) AS end_date,
         plan_tier,
         seats,
         mrr_amount,

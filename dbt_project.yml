@@ -5,15 +5,17 @@ profile: 'pjt02_subscription'
 seed-paths: ["seeds"]
 model-paths: ["models"]
 macro-paths: ["macros"]
+test-paths: ["tests"]
 clean-targets: 
   - "target"
   - "dbt_packages"
 
 models:
-  main:
+  pjt02_subscription:
     staging: 
       +materialized: view
     intermediate:
-      +materialized: view
+      fact:
+        +materialized: view
     marts:
       +materialized: table
