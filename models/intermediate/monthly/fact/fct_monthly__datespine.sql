@@ -7,7 +7,10 @@ subscription AS (SELECT * FROM {{ref('STG_RAW_RAVENSTACK_SUBSCRIPTIONS')}})
 , churn AS (SELECT * FROM {{ref('STG_RAW_RAVENSTACK_CHURN_EVENTS')}})
 , calendar AS (SELECT * FROM {{ref('STG_CMN_CALENDAR')}})
 , usage AS (SELECT * FROM {{ref('STG_RAW_RAVENSTACK_FEATURE_USAGE')}})
+, usage_month AS (SELECT * FROM {{ref('fct_monthly__usage_month')}})
+
 , subscription_mst AS (
+    {# grain : subscription_id #}
     SELECT 
         subscription_id
         , start_date
@@ -60,24 +63,36 @@ subscription AS (SELECT * FROM {{ref('STG_RAW_RAVENSTACK_SUBSCRIPTIONS')}})
 )
 , subscription_datespine AS (
     SELECT 
-        subscription_id
-        , subscription.account_id
+        base.subscription_id
+        , subsc_dim.account_id
         , month_trunc
-        , start_date
-        , COALESCE(end_date, '2999-01-01') AS end_date {#end_date is nullable for active plans#}
+        , subsc_dim.start_date
+        , COALESCE(subsc_dim.end_date, '2999-01-01') AS end_date {#end_date is nullable for active plans#}
+        , CASE WHEN churn_month.account_id IS NOT NULl THEN 1 ELSE 0 END AS is_churned
         , MAX(CASE WHEN churn_month.account_id IS NOT NULL THEN 1 ELSE 0 END)
             OVER (
-                PARTITION BY subscription_id, subscription.account_id 
+                PARTITION BY base.subscription_id, subsc_dim.account_id 
                 ORDER BY month_trunc
                 ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
             ) AS churn_flg {# Cumulative Max for carry flg foward following churn event #}
-        , mrr_amount
-        , refund_amount_usd
-    FROM subscription_month_cross
-    LEFT JOIN subscription
-    USING(subscription_id)
+        , NVL(subsc_amt.mrr_amount, 0 ) AS mrr_amount
+        , NVL(churn_month.refund_amount_usd, 0) AS refund_amount_usd
+        , NVL(usage_count, 0) AS usage_count
+    FROM subscription_month_cross AS base
+    
+    LEFT JOIN subscription AS subsc_amt
+    ON base.subscription_id = subsc_amt.subscription_id
+        AND month_trunc BETWEEN DATE_TRUNC('month', subsc_amt.start_date) AND DATEADD(day, -1, DATEADD(month, 1, DATE_TRUNC('month', NVL(subsc_amt.end_date, '2999-01-01'))))
+    
+    LEFT JOIN subscription AS subsc_dim
+    ON base.subscription_id = subsc_dim.subscription_id
+    
     LEFT JOIN churn_month
-    ON subscription.account_id = churn_month.account_id
-        AND subscription_month_cross.month_trunc = churn_month.churn_month
+    ON subsc_dim.account_id = churn_month.account_id
+        AND base.month_trunc = churn_month.churn_month
+    
+    LEFT JOIN usage_month 
+    ON base.subscription_id = usage_month.subscription_id
+        AND base.month_trunc = usage_month.usage_month
 )
-SELECT * FROM subscription_datespine
+SELECT * FROM subscription_datespine 

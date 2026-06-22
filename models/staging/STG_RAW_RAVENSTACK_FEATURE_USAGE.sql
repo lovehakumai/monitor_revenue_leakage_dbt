@@ -13,4 +13,4 @@ renamed as (
         is_beta_feature
     from source
 )
-select * from renamed
+SELECT * FROM renamed 

@@ -4,40 +4,53 @@ models:
     - name: STG_RAW_RAVENSTACK_ACCOUNTS
       columns:
         - name: account_id
-          tests:
+          data_tests:
             - unique
             - not_null
     - name: STG_RAW_RAVENSTACK_CHURN_EVENTS 
       columns:
         - name: churn_event_id
-          tests:
+          data_tests:
             - unique
             - not_null
+        - name: account_id
+          data_tests:
+            - relationships:
+                arguments:
+                  to : ref('STG_RAW_RAVENSTACK_SUBSCRIPTIONS')
+                  field: account_id
+                config:
+                  where: "churn_date >= dateadd(day, -3, current_date())"
 
     - name: STG_RAW_RAVENSTACK_FEATURE_USAGE 
       columns: 
         - name: usage_id
-          tests: 
+          data_tests: 
             - not_null
         - name: subscription_id
-          tests:
+          data_tests:
             - not_null
-      tests:
+      data_tests:
         - dbt_utils.unique_combination_of_columns:
             arguments:
               combination_of_columns:
                 - usage_id
                 - subscription_id
+              config:
+                where: "usage_date >= DATEADD(day, -3, current_date())"
 
     - name: STG_RAW_RAVENSTACK_SUBSCRIPTIONS 
       columns:
         - name: subscription_id
-          tests:
+          data_tests:
             - unique
+            - not_null
+        - name: account_id
+          data_tests:
             - not_null
     - name: STG_RAW_RAVENSTACK_SUPPORT_TICKETS 
       columns:
         - name: ticket_id
-          tests:
+          data_tests:
             - unique
             - not_null

@@ -1,0 +1,62 @@
+version: 2
+
+models:
+    - name: mart_monthly__account_agg
+      columns:
+        - name: account_id
+          data_tests:
+            - not_null
+        - name: cal_month
+          data_tests:
+            - not_null
+        - name: account_status_monthly
+          data_tests:
+            - accepted_values:
+                arguments:
+                  values:
+                    - 'Before Activation'
+                    - 'New Business'
+                    - 'New Business'
+                    - 'Churned Month'
+                    - 'Retain'
+                    - 'Reactivation'
+                    - 'Expansion'
+                    - 'Contraction'
+                    - 'Expansion'
+                    - 'Contraction'
+                    - 'Retain'
+                    - 'After Churned'
+      data_tests:
+        - dbt_utils.unique_combination_of_columns:
+            arguments:
+              combination_of_columns:
+                - account_id
+                - cal_month
+              config:
+                where: "cal_month >= DATEADD(month, -3, current_date())"
+
+    - name: mart_daily__log
+      columns: 
+        - name: usage_status
+          data_tests:
+            - accepted_values:
+                arguments:
+                  values: 
+                    - 'Correct'
+                    - 'Correct Not Used After Churn' 
+                    - 'Incorrect Used After Churn'
+                    - 'Correct Not Used After Expiration'
+                    - 'Incorrect Used After Expiration'
+                    - 'Correct Not Used Before Start'
+                    - 'InCorrect Used Before Start'
+      data_tests:
+        - dbt_utils.unique_combination_of_columns:
+            arguments:
+              combination_of_columns:
+                - subscription_id
+                - account_id 
+                - cl_date
+              config:
+                where: "cl_date >= DATEADD(day, -3, current_date())"
+
+        
