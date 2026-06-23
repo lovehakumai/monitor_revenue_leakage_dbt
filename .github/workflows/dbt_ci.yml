@@ -36,7 +36,7 @@ jobs:
         run: |
           mkdir -p ~/.dbt 
           cat << 'EOF' > ~/.dbt/profiles.yml 
-          olist_analytics:
+          pjt02_subscription:
             outputs:
               ci_target:
                 type: snowflake
