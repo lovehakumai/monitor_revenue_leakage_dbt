@@ -9,23 +9,19 @@ models:
         - name: cal_month
           data_tests:
             - not_null
-        - name: account_status_monthly
+        - name: payment_status
           data_tests:
             - accepted_values:
                 arguments:
                   values:
-                    - 'Before Activation'
-                    - 'New Business'
-                    - 'New Business'
-                    - 'Churned Month'
+                    - 'Before Activate'
+                    - 'First Payment'
                     - 'Retain'
-                    - 'Reactivation'
+                    - 'Stop Paying'
+                    - 'Reactivate'
                     - 'Expansion'
                     - 'Contraction'
-                    - 'Expansion'
-                    - 'Contraction'
-                    - 'Retain'
-                    - 'After Churned'
+                    - 'Suspended'
       data_tests:
         - dbt_utils.unique_combination_of_columns:
             arguments:
