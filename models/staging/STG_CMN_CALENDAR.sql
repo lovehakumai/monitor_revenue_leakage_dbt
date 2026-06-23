@@ -1,3 +1,4 @@
+{# STG_CMN_CALENDAR #}
 with source as (
     select * from {{ source('common', 'CMN_CALENDAR') }}
 ),
