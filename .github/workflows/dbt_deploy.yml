@@ -1,0 +1,92 @@
+name: dbt_ci_pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  dbt_test_job:
+    runs-on: ubuntu-latest
+    environment: snowflake_pab77220
+    env:
+      SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dbt-snowflake
+        run: |
+          pip install --upgrade pip
+          pip install dbt-snowflake
+        
+      - name: Install dbt dependencies
+        run: dbt deps
+    
+      - name: Set up dbt profiles.yml 
+        run: |
+          mkdir -p ~/.dbt 
+          cat << 'EOF' > ~/.dbt/profiles.yml 
+          olist_analytics:
+            outputs:
+              ci_target:
+                type: snowflake
+                account: ${{ secrets.SF_ACCOUNT }}
+                user: ${{ secrets.SF_USER }}
+                private_key: "{{env_var('SF_PRIVATE_KEY')}}"
+                role: ${{ secrets.SF_ROLE }}
+                warehouse: ${{ secrets.SF_WAREHOUSE }}
+                database: KAGGLE_SUBSCRIPTION
+                schema: DBT_PJT
+            target: ci_target
+          EOF
+
+      - name: Run Full Deployment (All Models)
+        run: |
+          dbt build --profiles-dir ~/.dbt
+      
+      - name: Prepare Manifest for Next CI Sessions
+        run: | 
+          mkdir -p prod_state
+          cp target/manifest.json prod_state/manifest.json
+      
+      - name: Save Production dbt State Manifest
+        uses: actions/cache/save@v4
+        with: 
+          path: prod_state/manifest.json
+          key: dbt-manifest-main
+
+      - name: Generate dbt Docs
+        run: |
+          dbt docs generate --profiles-dir ~/.dbt 
+    
+      - name: Combine Docs into Standalone HTML
+        run: |
+          python combine_docs.py 
+    
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+    
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with: 
+          path: './target'
+    
+      - name: Deploy to Github Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

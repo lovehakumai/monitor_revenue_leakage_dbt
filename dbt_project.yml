@@ -15,7 +15,8 @@ models:
     staging: 
       +materialized: view
     intermediate:
-      fact:
-        +materialized: view
+      monthly:
+        fact:
+          +materialized: view
     marts:
       +materialized: table
