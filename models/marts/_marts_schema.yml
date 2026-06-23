@@ -43,12 +43,12 @@ models:
                 arguments:
                   values: 
                     - 'Correct'
-                    - 'Correct Not Used After Churn' 
-                    - 'Incorrect Used After Churn'
-                    - 'Correct Not Used After Expiration'
-                    - 'Incorrect Used After Expiration'
                     - 'Correct Not Used Before Start'
-                    - 'InCorrect Used Before Start'
+                    - 'Incorrect Used Before Start'
+                    - 'Correct Not Used After Churn'
+                    - 'Correct Not Used After Expiration'
+                    - 'Incorrect Used After Churn'
+                    - 'Incorrect Used After Expiration'
       data_tests:
         - dbt_utils.unique_combination_of_columns:
             arguments:
