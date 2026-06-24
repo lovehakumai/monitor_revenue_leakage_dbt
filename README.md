@@ -25,6 +25,7 @@ Environment :
 ---
 
 ## 🛠️ Data Infrastructure & Tech Stack
+```mermaid
 graph TD
     A[Kaggle / Olist Compressed Zip] -->|Manual Stage Allocation| B(Snowflake Internal Stage)
     B -->|Encrypted File Stream Access| C[Snowpark Python Engine]
@@ -43,18 +44,30 @@ graph TD
     style D fill:#1A237E,stroke:#29B6F6,stroke-width:2px;
     style E fill:#0D47A1,stroke:#FFF,stroke-width:2px;
     style F fill:#4CAF50,stroke:#FFF
+```
 
 ### dbt leanage
 This project is for self-skilling so that Source table is from Kaggle,   
 This is the architecture of tables in this project. details are [here](https://www.kaggle.com/datasets/rivalytics/saas-subscription-and-churn-analytics-dataset).
 
-accounts (PK: account_id)  
-│  
-├── subscriptions (FK → accounts.account_id)  
-│ └── feature_usage (FK → subscriptions.subscription_id)  
-│  
-├── support_tickets (FK → accounts.account_id)  
-└── churn_events (FK → accounts.account_id)  
+```mermaid
+erDiagram
+    ACCOUNTS ||--o{ SUBSCRIPTIONS : "has"
+    ACCOUNTS ||--o{ SUPPORT_TICKETS : "files"
+    ACCOUNTS ||--o{ CHURN_EVENTS : "triggers"
+    SUBSCRIPTIONS ||--o{ FEATURE_USAGE : "contains"
+
+    ACCOUNTS {
+        string account_id PK
+    }
+    SUBSCRIPTIONS {
+        string subscription_id PK
+        string account_id FK
+    }
+    FEATURE_USAGE {
+        string subscription_id FK
+    }
+```
 
 ### Data leanage of this project:  
 ![dbt Leanage](asset/dbt_leanage.png)
