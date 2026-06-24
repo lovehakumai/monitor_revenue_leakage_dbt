@@ -25,13 +25,24 @@ Environment :
 ---
 
 ## 🛠️ Data Infrastructure & Tech Stack
-[Kaggle Zip]
-|
-[Snowflake Staging] ──> (Snowflake Python Script) ──> [Snowflake Views] ──> [Snowflake Table] ──> [Streamlit in Snowflake]
-                                                    │
-                                                    | [dbt test & run]
-                                                    [GitHub Actions Slim CI]
----
+graph TD
+    A[Kaggle / Olist Compressed Zip] -->|Manual Stage Allocation| B(Snowflake Internal Stage)
+    B -->|Encrypted File Stream Access| C[Snowpark Python Engine]
+    C -->|In-Memory Chunked Streaming| D[Snowflake Compute Pushdown]
+    D -->|High-Throughput Bulk Insertion| E[(Snowflake Database: RAW Layer)]
+
+    subgraph GitHub Actions Pipeline
+        F[GitHub CI Runner] -->|Asymmetric RSA-2048 Key-Pair Handshake| D
+        F -->|dbt test & run| G[GitHub Actions Slim CI]
+    end
+
+    E -.->|dbt Models| H[dbt Core Models]
+    H --> I[Streamlit in Snowflake]
+
+    style B fill:#333,stroke:#29B6F6,stroke-width:2px;
+    style D fill:#1A237E,stroke:#29B6F6,stroke-width:2px;
+    style E fill:#0D47A1,stroke:#FFF,stroke-width:2px;
+    style F fill:#4CAF50,stroke:#FFF
 
 ### dbt leanage
 This project is for self-skilling so that Source table is from Kaggle,   
