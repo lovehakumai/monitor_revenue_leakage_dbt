@@ -128,6 +128,7 @@ In dbt project, the data_tests are implemented to make workflow success expected
 ---
 
 ## 📊 Dashboard Sneak Peek (UI/UX Breakdown)
+Streamlit project repository is [here](https://github.com/lovehakumai/monitor_revenue_leakage_snowflake)
 ![MRR MOVEMENTS](asset/1_st_mrr.png)
 ![USAGE DAILY LOGS](asset/2_st_usagelog.png)
 ![START & CHURN](asset/3_st_stt_churn.png)
