@@ -127,6 +127,12 @@ In dbt project, the data_tests are implemented to make workflow success expected
 
 ---
 
+## ⚠️ Architectual Note on datasource Limitations
+Due to the absence of the explicit payment gateway webhooks (example,   Stripe) and feature-tier metadata in the underlying kaggle dataset,   
+The MRR movements and payment satus are programmatically imputed using single-pass window aggregations over subscription. While highly effective for this analytical scope, an enterprise-grade refactoring would replace these assumptions with direct snowpipe CDC ingestion from backend.  
+
+---
+
 ## 📊 Dashboard Sneak Peek (UI/UX Breakdown)
 Streamlit project repository is [here](https://github.com/lovehakumai/monitor_revenue_leakage_snowflake)
 ![MRR MOVEMENTS](asset/1_st_mrr.png)
