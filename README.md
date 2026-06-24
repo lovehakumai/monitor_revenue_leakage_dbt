@@ -46,7 +46,7 @@ graph TD
     style F fill:#4CAF50,stroke:#FFF
 ```
 
-### dbt leanage
+### dbt lineage
 This project is for self-skilling so that Source table is from Kaggle,   
 This is the architecture of tables in this project. details are [here](https://www.kaggle.com/datasets/rivalytics/saas-subscription-and-churn-analytics-dataset).
 
@@ -72,7 +72,7 @@ erDiagram
 ### Data leanage of this project:  
 ![dbt Leanage](asset/dbt_leanage.png)
 
-Tha main tables in this project are `mart_daily_log` and  `mart_monthly__acount_agg`. 
+Tha main tables in this project are `mart_daily_log` and  `mart_monthly__account_agg`. 
 
 #### `mart_daily_log` 
 The grain level in this table is `subscription x account_id x cl_date`,   
