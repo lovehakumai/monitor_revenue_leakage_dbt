@@ -1,12 +1,110 @@
-# 🥪 The Jaffle Shop 🦘
+# Enterprise SaaS Revenue Leakage Audit & Financial Analytics Platform
 
-_powered by the dbt Fusion engine_
+---
 
-Welcome! This is a sandbox project for exploring the basic functionality of Fusion. It's based on a fictional restaurant called the Jaffle Shop that serves [jaffles](https://en.wikipedia.org/wiki/Pie_iron).
+## 📈 Business Case & Analytical Problem Statement
+SaaS company generally has 2 problems in data usage.
 
-To get started:
-1. Set up your database connection in `~/.dbt/profiles.yml`. If you got here by running `dbt init`, you should already be good to go.
-2. Run `dbt build`. That's it!
+1. Dealing with mismatched data between data from system and data from actual usage.  
+    example. 
+    * Services continue to be used after contract has expired  
+    * Users continue to use the premium features after downgrading their plans
+2. Monitoring the credit costs in Snowflake
 
-> [!NOTE]
-> If you're brand-new to dbt, we recommend starting with the [dbt Learn](https://learn.getdbt.com/) platform. It's a free, interactive way to learn dbt, and it's a great way to get started if you're new to the tool.
+In this project, I implemented 2 mart tables to analyze the Monthly Recurring Revenue(MRR) and to monitor User's incorrecct usage with dbt and Snowflake. 
+
+Additionaly, Streamlit dashboard is implemented to analyze the data made here and it can monitor how much credit is used cost from the dashboard.
+
+Environment : 
+* Python : 3.12.0
+* dbt : 1.11.11
+* Snowflake 
+* Streamlit
+* Github Actions
+
+---
+
+## 🛠️ Data Infrastructure & Tech Stack
+[Kaggle Zip]
+|
+[Snowflake Staging] ──> (Snowflake Python Script) ──> [Snowflake Views] ──> [Snowflake Table] ──> [Streamlit in Snowflake]
+                                                    │
+                                                    | [dbt test & run]
+                                                    [GitHub Actions Slim CI]
+---
+
+### dbt leanage
+This project is for self-skilling so that Source table is from Kaggle,   
+This is the architecture of tables in this project. details are [here](https://www.kaggle.com/datasets/rivalytics/saas-subscription-and-churn-analytics-dataset).
+
+accounts (PK: account_id)  
+│  
+├── subscriptions (FK → accounts.account_id)  
+│ └── feature_usage (FK → subscriptions.subscription_id)  
+│  
+├── support_tickets (FK → accounts.account_id)  
+└── churn_events (FK → accounts.account_id)  
+
+### Data leanage of this project:  
+![dbt Leanage](asset/dbt_leanage.png)
+
+Tha main tables in this project are `mart_daily_log` and  `mart_monthly__acount_agg`. 
+
+#### `mart_daily_log` 
+The grain level in this table is `subscription x account_id x cl_date`,   
+usage_status is the main purpose of this table, other columns are used for additional information.This table is used in usage logs in streamlit.
+
+Schema : 
+* subscription_id
+* account_id
+* cl_date 
+* subscription_tier
+* start_date
+* end_date
+* is_used
+* is_churned
+* is_started
+* usage_status
+
+#### `mart_monthly__acount_agg`
+The grain level in this table is `account_id x cal_month`,  
+this table aggregate the monthly revenue and supports comparing the expected revenue and actual revenue from users. and it also tracks the user's monthly payment action type with `payment_status`.
+
+Schema : 
+* account_id
+* cal_month
+* mrr_amount
+* act_month_usd
+* usage_count
+* is_started
+* is_churned
+* payment_status
+
+
+## 💡 Advanced Technical Highlights & Core Optimizations
+
+### 1. Conditional Window Aggregations (Single-Pass Modeling)
+In mart tables, I used single-pass window aggregation to calculate status columns. It will take less computing and beneficial on finance.
+
+### 2. Real-Time FinOps Self-Auditing Query Pipeline  
+
+In standard feature of snowflake, it's impossible to get the credit   consumed in Streamlit dashboard in real-time because the credit data is only in account usage views. (Account-usage views will be updated 45mins ~ 1 day after executing queries.).However, I implemented the Credit Cost View at last section in dashboard.  
+
+I calculated the cost timeline based on the query_history view `in information_schema` which has real-time updating. It will calculate the total credit in a day and you can analyze what kind of queries or whose queries took credit most.
+
+---
+
+## 🧪 Data Quality Assurance & Governance (`test.yml`)
+In dbt project, the data_tests are implemented to make workflow success expectedly. 
+
+* `Relationship test` : Verifying the FK in child table is included in parent table.  
+
+* `Unique/Not Unique test` : Verifying the UK is unique or not. Mart table has unique_combination_columns_test to check the data's grain is same as expected.
+
+---
+
+## 📊 Dashboard Sneak Peek (UI/UX Breakdown)
+![MRR MOVEMENTS](asset/1_st_mrr.png)
+![USAGE DAILY LOGS](asset/2_st_usagelog.png)
+![START & CHURN](asset/3_st_stt_churn.png)
+![CREDIT](asset/4_st_credit.png)

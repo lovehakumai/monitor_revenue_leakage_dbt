@@ -28,12 +28,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12.0'
 
       - name: Install dbt-snowflake
         run: |
           pip install --upgrade pip
-          pip install dbt-snowflake
+          pip install dbt-snowflake == 1.11.5
         
       - name: Install dbt dependencies
         run: dbt deps
